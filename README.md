@@ -44,6 +44,4 @@ Sistema de agendamento de consultas oftalmológicas para o Hospital Geral Univer
 4. Push para a branch
 5. Abra um Pull Request
 
-## Licença
-
-Este projeto é propriedade do Hospital Geral Universitário.
+#
