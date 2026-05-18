@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface CalendarProps {
@@ -11,7 +11,7 @@ interface CalendarProps {
 
 export default function Calendar({ onDateSelect, selectedDate }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [availableDays, setAvailableDays] = useState<Set<string>>(new Set())
+  const [hoveredDay, setHoveredDay] = useState<number | null>(null)
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -61,10 +61,12 @@ export default function Calendar({ onDateSelect, selectedDate }: CalendarProps) 
 
   const handlePrevMonth = () => {
     setCurrentMonth(new Date(year, month - 1, 1))
+    setHoveredDay(null)
   }
 
   const handleNextMonth = () => {
     setCurrentMonth(new Date(year, month + 1, 1))
+    setHoveredDay(null)
   }
 
   const handleDayClick = (day: number) => {
@@ -73,19 +75,21 @@ export default function Calendar({ onDateSelect, selectedDate }: CalendarProps) 
   }
 
   return (
-    <div className="rounded-xl border border-outline-variant bg-white p-6">
+    <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
       {/* Month Navigation */}
       <div className="mb-6 flex items-center justify-between">
         <button
           onClick={handlePrevMonth}
-          className="rounded-full p-2 text-on-surface-variant transition hover:bg-surface-container"
+          className="rounded-xl p-2 text-text-tertiary transition-all duration-200 hover:bg-surface-secondary hover:text-text-primary"
         >
           <ChevronLeft size={20} />
         </button>
-        <h3 className="text-lg font-semibold capitalize">{monthName}</h3>
+        <h3 className="text-lg font-semibold capitalize text-text-primary">
+          {monthName}
+        </h3>
         <button
           onClick={handleNextMonth}
-          className="rounded-full p-2 text-on-surface-variant transition hover:bg-surface-container"
+          className="rounded-xl p-2 text-text-tertiary transition-all duration-200 hover:bg-surface-secondary hover:text-text-primary"
         >
           <ChevronRight size={20} />
         </button>
@@ -96,7 +100,7 @@ export default function Calendar({ onDateSelect, selectedDate }: CalendarProps) 
         {dayNames.map((name) => (
           <div
             key={name}
-            className="py-2 text-center text-xs font-medium text-on-surface-variant"
+            className="py-2 text-center text-xs font-semibold uppercase tracking-wider text-text-tertiary"
           >
             {name}
           </div>
@@ -116,37 +120,81 @@ export default function Calendar({ onDateSelect, selectedDate }: CalendarProps) 
           const disabled = isPast(day) || isWeekend(day)
           const selected = isSelected(day)
           const todayClass = isToday(day)
+          const isHovered = hoveredDay === day
 
           return (
             <button
               key={day}
               onClick={() => handleDayClick(day)}
+              onMouseEnter={() => !disabled && setHoveredDay(day)}
+              onMouseLeave={() => setHoveredDay(null)}
               disabled={disabled}
               className={`
-                aspect-square rounded-full text-sm font-medium transition-all
-                ${disabled ? 'cursor-not-allowed text-outline-variant' : 'cursor-pointer hover:bg-primary-container/20'}
-                ${selected ? 'bg-primary text-white hover:bg-primary-container' : ''}
-                ${todayClass && !selected ? 'border-2 border-primary text-primary' : ''}
+                group relative aspect-square transition-all duration-200
+                ${disabled 
+                  ? 'cursor-not-allowed' 
+                  : 'cursor-pointer'
+                }
               `}
             >
-              {day}
+              {/* Hover background */}
+              {!disabled && !selected && (
+                <span
+                  className={`
+                    absolute inset-1 rounded-full transition-all duration-200
+                    ${isHovered 
+                      ? 'bg-primary-50 scale-100' 
+                      : 'bg-transparent scale-75'
+                    }
+                  `}
+                />
+              )}
+
+              {/* Selected background */}
+              {selected && (
+                <span className="absolute inset-1 rounded-full bg-primary shadow-md shadow-primary/20" />
+              )}
+
+              {/* Today ring */}
+              {todayClass && !selected && (
+                <span className="absolute inset-1 rounded-full border-2 border-primary" />
+              )}
+
+              {/* Day number */}
+              <span
+                className={`
+                  relative z-10 text-sm font-medium transition-colors duration-200
+                  ${disabled 
+                    ? 'text-text-tertiary/40' 
+                    : selected
+                      ? 'text-white'
+                      : isHovered
+                        ? 'text-primary'
+                        : todayClass
+                          ? 'text-primary'
+                          : 'text-text-secondary'
+                  }
+                `}
+              >
+                {day}
+              </span>
             </button>
           )
         })}
       </div>
 
       {/* Legend */}
-      <div className="mt-4 flex items-center gap-4 text-xs text-on-surface-variant">
-        <div className="flex items-center gap-1">
-          <div className="h-3 w-3 rounded-full bg-primary" />
+      <div className="mt-5 flex items-center gap-5 border-t border-border pt-4">
+        <div className="flex items-center gap-2 text-xs text-text-tertiary">
+          <div className="h-3 w-3 rounded-full bg-primary shadow-sm shadow-primary/20" />
           <span>Selecionado</span>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2 text-xs text-text-tertiary">
           <div className="h-3 w-3 rounded-full border-2 border-primary" />
           <span>Hoje</span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="h-3 w-3 rounded-full bg-outline-variant" />
+        <div className="flex items-center gap-2 text-xs text-text-tertiary">
+          <div className="h-3 w-3 rounded-full bg-surface-tertiary" />
           <span>Indisponível</span>
         </div>
       </div>

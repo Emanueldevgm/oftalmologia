@@ -4,24 +4,36 @@
 import { useState } from 'react'
 import AdminLayout from '@/app/components/Admin/AdminLayout'
 import ProtectedRoute from '@/app/components/Shared/ProtectedRoute'
-import { Search, User, Calendar, Clock, AlertCircle } from 'lucide-react'
+import { Search, User, Calendar, Clock, AlertCircle, Mail, Phone, ShieldAlert, CheckCircle2, XCircle, Eye } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+
+interface ConsultaHistorico {
+  id: string
+  data_hora: string
+  status: string
+  medicos: { nome: string } | null
+}
+
+interface PacienteData {
+  bi: string
+  nome: string
+  email: string
+  telefone: string | null
+  consultas: ConsultaHistorico[]
+  faltas: number
+  bloqueado: boolean
+}
+
+const statusConfig: Record<string, { label: string; icon: React.ElementType; variant: 'success' | 'danger' | 'info' | 'warning' | 'neutral' }> = {
+  confirmada: { label: 'Confirmada', icon: CheckCircle2, variant: 'success' },
+  cancelada: { label: 'Cancelada', icon: XCircle, variant: 'danger' },
+  realizada: { label: 'Realizada', icon: CheckCircle2, variant: 'info' },
+  faltou: { label: 'Faltou', icon: AlertCircle, variant: 'warning' },
+}
 
 export default function PacientesPage() {
   const [bi, setBi] = useState('')
-  const [paciente, setPaciente] = useState<{
-    bi: string
-    nome: string
-    email: string
-    telefone: string | null
-    consultas: Array<{
-      id: string
-      data_hora: string
-      status: string
-      medicos: { nome: string } | null
-    }>
-    faltas: number
-    bloqueado: boolean
-  } | null>(null)
+  const [paciente, setPaciente] = useState<PacienteData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -46,92 +58,213 @@ export default function PacientesPage() {
     }
   }
 
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr)
+    return d.toLocaleDateString('pt', { day: '2-digit', month: 'short', year: 'numeric' })
+  }
+
+  const formatTime = (dateStr: string) => {
+    const d = new Date(dateStr)
+    return d.toLocaleTimeString('pt', { hour: '2-digit', minute: '2-digit' })
+  }
+
   return (
     <ProtectedRoute>
       <AdminLayout>
-        <div className="space-y-6">
+        <div className="mx-auto max-w-4xl space-y-6">
           <div>
-            <h2 className="text-2xl font-bold text-on-surface">Pacientes</h2>
-            <p className="text-on-surface-variant">Buscar e visualizar pacientes</p>
+            <h2 className="text-2xl font-bold text-text-primary">Pacientes</h2>
+            <p className="text-text-secondary">Buscar e visualizar informações de pacientes</p>
           </div>
 
+          {/* Search Bar */}
           <div className="flex gap-3">
-            <input
-              type="text"
-              value={bi}
-              onChange={(e) => setBi(e.target.value.toUpperCase())}
-              placeholder="Buscar por BI..."
-              className="flex-1 rounded-xl border border-outline-variant px-4 py-3 outline-none focus:ring-2 focus:ring-primary"
-              maxLength={14}
-            />
+            <div className="relative flex-1">
+              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" />
+              <input
+                type="text"
+                value={bi}
+                onChange={(e) => setBi(e.target.value.toUpperCase())}
+                placeholder="Buscar por BI (ex: 001234567LA000)..."
+                className="w-full rounded-xl border border-border bg-white py-3 pl-10 pr-4 text-sm text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 placeholder:text-text-tertiary"
+                maxLength={14}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              />
+            </div>
             <button
               onClick={handleSearch}
               disabled={loading || bi.length < 14}
-              className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary-container disabled:opacity-50"
+              className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
             >
-              <Search size={18} />
-              Buscar
+              {loading ? (
+                <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              ) : (
+                <Search size={18} />
+              )}
+              {loading ? 'Buscando...' : 'Buscar'}
             </button>
           </div>
 
+          {/* Loading */}
           {loading && (
-            <div className="h-48 animate-pulse rounded-xl bg-surface-container" />
-          )}
-
-          {error && (
-            <div className="rounded-xl bg-error-container/20 p-4 text-sm text-error">
-              {error}
+            <div className="space-y-4">
+              <div className="h-32 animate-pulse rounded-2xl bg-surface-tertiary" />
+              <div className="h-48 animate-pulse rounded-2xl bg-surface-tertiary" />
             </div>
           )}
 
-          {paciente && (
-            <div className="space-y-4">
-              <div className="rounded-xl border border-outline-variant bg-white p-5">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="rounded-full bg-primary-container/20 p-3 text-primary">
-                    <User size={24} />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">{paciente.nome}</h3>
-                    <p className="text-sm text-on-surface-variant">BI: {paciente.bi}</p>
-                  </div>
-                  {paciente.bloqueado && (
-                    <span className="ml-auto rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-800">
-                      Bloqueado
-                    </span>
-                  )}
+          {/* Error */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 p-5"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100">
+                  <AlertCircle size={20} className="text-red-600" />
                 </div>
-                <div className="grid gap-2 text-sm sm:grid-cols-2">
-                  <p>📧 {paciente.email}</p>
-                  <p>📱 {paciente.telefone || 'N/A'}</p>
-                  <p>⚠️ Faltas (6m): {paciente.faltas}</p>
-                </div>
-              </div>
-
-              {paciente.consultas.length > 0 && (
                 <div>
-                  <h4 className="mb-3 font-medium">Histórico de Consultas</h4>
-                  <div className="space-y-2">
-                    {paciente.consultas.map((c) => (
-                      <div key={c.id} className="flex items-center justify-between rounded-lg border border-outline-variant bg-white p-3 text-sm">
-                        <div className="flex items-center gap-3">
-                          <Calendar size={16} className="text-primary" />
-                          <span>{new Date(c.data_hora).toLocaleDateString('pt')}</span>
-                          <Clock size={16} className="text-primary" />
-                          <span>{new Date(c.data_hora).toLocaleTimeString('pt', { hour: '2-digit', minute: '2-digit' })}</span>
+                  <p className="text-sm font-semibold text-red-700">Paciente não encontrado</p>
+                  <p className="text-xs text-red-600/70">{error}</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Resultado */}
+          <AnimatePresence>
+            {paciente && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="space-y-5"
+              >
+                {/* Card do Paciente */}
+                <div className="overflow-hidden rounded-2xl border border-border/60 bg-white shadow-sm">
+                  <div className="border-b border-border/60 bg-surface-secondary/30 p-6">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-50 shadow-sm">
+                          <User size={28} className="text-primary" />
                         </div>
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                          c.status === 'confirmada' ? 'bg-green-100 text-green-800' :
-                          c.status === 'cancelada' ? 'bg-red-100 text-red-800' :
-                          'bg-blue-100 text-blue-800'
-                        }`}>
-                          {c.status}
-                        </span>
+                        <div>
+                          <h3 className="text-xl font-bold text-text-primary">{paciente.nome}</h3>
+                          <p className="text-sm text-text-tertiary">BI: {paciente.bi}</p>
+                        </div>
                       </div>
-                    ))}
+                      {paciente.bloqueado && (
+                        <span className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700">
+                          <ShieldAlert size={16} />
+                          Bloqueado
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid gap-4 p-6 sm:grid-cols-3">
+                    <div className="flex items-center gap-3 rounded-xl bg-surface-secondary/50 p-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50">
+                        <Mail size={16} className="text-blue-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs text-text-tertiary">Email</p>
+                        <p className="truncate text-sm font-medium text-text-primary">{paciente.email}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 rounded-xl bg-surface-secondary/50 p-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50">
+                        <Phone size={16} className="text-emerald-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-text-tertiary">Telefone</p>
+                        <p className="text-sm font-medium text-text-primary">{paciente.telefone || 'Não informado'}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 rounded-xl bg-surface-secondary/50 p-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50">
+                        <AlertCircle size={16} className="text-amber-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-text-tertiary">Faltas (6 meses)</p>
+                        <p className="text-sm font-bold text-text-primary">{paciente.faltas}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              )}
+
+                {/* Histórico de Consultas */}
+                {paciente.consultas.length > 0 && (
+                  <div className="rounded-2xl border border-border/60 bg-white shadow-sm">
+                    <div className="border-b border-border/60 px-6 py-4">
+                      <h4 className="text-sm font-semibold uppercase tracking-wider text-text-tertiary">
+                        Histórico de Consultas ({paciente.consultas.length})
+                      </h4>
+                    </div>
+                    <div className="divide-y divide-border/40">
+                      {paciente.consultas.map((consulta, index) => {
+                        const status = statusConfig[consulta.status] || { label: consulta.status, icon: Eye, variant: 'neutral' as const }
+                        const StatusIcon = status.icon
+                        const variantStyles: Record<string, string> = {
+                          success: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                          danger: 'bg-red-50 text-red-700 border-red-200',
+                          warning: 'bg-amber-50 text-amber-700 border-amber-200',
+                          info: 'bg-blue-50 text-blue-700 border-blue-200',
+                          neutral: 'bg-slate-50 text-slate-600 border-slate-200',
+                        }
+
+                        return (
+                          <motion.div
+                            key={consulta.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: index * 0.05 }}
+                            className="flex flex-wrap items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-surface-secondary/30"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-2 text-sm text-text-secondary">
+                                <Calendar size={15} className="text-text-tertiary" />
+                                <span>{formatDate(consulta.data_hora)}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm text-text-secondary">
+                                <Clock size={15} className="text-text-tertiary" />
+                                <span>{formatTime(consulta.data_hora)}</span>
+                              </div>
+                              {consulta.medicos && (
+                                <div className="flex items-center gap-2 text-sm text-text-secondary">
+                                  <User size={15} className="text-text-tertiary" />
+                                  <span>Dr(a). {consulta.medicos.nome}</span>
+                                </div>
+                              )}
+                            </div>
+                            <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${variantStyles[status.variant]}`}>
+                              <StatusIcon size={12} />
+                              {status.label}
+                            </span>
+                          </motion.div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Empty State (quando não buscou nada ainda) */}
+          {!loading && !paciente && !error && (
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-white py-16 text-center">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-secondary">
+                <Search size={28} className="text-text-tertiary" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-text-primary">Buscar Paciente</h3>
+              <p className="max-w-sm text-sm text-text-secondary">
+                Insira o número do Bilhete de Identidade (BI) do paciente para visualizar suas informações e histórico de consultas.
+              </p>
             </div>
           )}
         </div>

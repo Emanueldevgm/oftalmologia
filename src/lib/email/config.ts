@@ -19,7 +19,7 @@ export const transporter = nodemailer.createTransport({
 })
 
 export const emailFrom =
-  process.env.SMTP_FROM || 'consultas.oftalmologia@hgu.gov.ao'
+  process.env.SMTP_FROM || 'contato@hgu.gov.ao'
 
 interface SendEmailResult {
   success: boolean

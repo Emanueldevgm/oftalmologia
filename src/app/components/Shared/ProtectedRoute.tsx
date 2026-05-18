@@ -54,17 +54,26 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     )
   }
 
-  if (!isAuthorized) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-surface">
-        <div className="text-center">
-          <ShieldAlert size={48} className="mx-auto text-error" />
-          <p className="mt-4 text-lg font-medium text-on-surface">Acesso negado</p>
-          <p className="mt-2 text-sm text-on-surface-variant">Redirecionando para o login...</p>
-        </div>
+  // Já redireciona, mas podemos adicionar um botão de retry
+if (!isAuthorized) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-surface">
+      <div className="text-center">
+        <ShieldAlert size={48} className="mx-auto text-error" />
+        <p className="mt-4 text-lg font-medium text-on-surface">Acesso negado</p>
+        <p className="mt-2 text-sm text-on-surface-variant">
+          Redirecionando para o login...
+        </p>
+        <button
+          onClick={() => router.replace('/admin/login')}
+          className="mt-4 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white"
+        >
+          Ir para Login
+        </button>
       </div>
-    )
-  }
+    </div>
+  )
+}
 
   return <>{children}</>
 }

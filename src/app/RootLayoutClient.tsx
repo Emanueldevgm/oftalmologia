@@ -11,8 +11,10 @@ export default function RootLayoutClient({
 }: {
   children: React.ReactNode
 }) {
-  const pathname = usePathname()
+  const pathname = usePathname() ?? '/'
   const isAdmin = pathname.startsWith('/admin')
+  const hideFooterPaths = ['/agendar', '/consultar', '/cancelar']
+  const showFooter = !hideFooterPaths.includes(pathname)
 
   if (isAdmin) {
     return (
@@ -27,7 +29,7 @@ export default function RootLayoutClient({
     <Aoscompo>
       <Header />
       <main>{children}</main>
-      <Footer />
+      {showFooter && <Footer />}
       <ScrollToTop />
     </Aoscompo>
   )

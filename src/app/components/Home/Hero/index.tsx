@@ -1,134 +1,146 @@
 'use client'
 
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { Calendar, ArrowRight, Eye, Shield, Clock } from 'lucide-react'
-import { motion } from 'framer-motion'
+import Image from 'next/image'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ArrowRight, ChevronRight } from 'lucide-react'
+
+const HOSPITAL_IMAGES = [
+  {
+    src: '/images/hospital/hospital.jpg',
+    alt: 'Entrada do hospital',
+  },
+  {
+    src: '/images/hospital/hospital2.jpg',
+    alt: 'Facilidades modernas do hospital',
+  },
+]
 
 export default function Hero() {
+  const [currentImage, setCurrentImage] = useState(0)
+
+  const nextImage = useCallback(() => {
+    setCurrentImage((prev) => (prev + 1) % HOSPITAL_IMAGES.length)
+  }, [])
+
+  useEffect(() => {
+    const timer = setInterval(nextImage, 5000)
+    return () => clearInterval(timer)
+  }, [nextImage])
+
   return (
-    <section className="relative overflow-hidden bg-surface pb-0 pt-16 md:pt-24">
-      {/* Background Decor */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] to-secondary/[0.03]" />
-      <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary-fixed/20 blur-3xl" />
-      <div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-secondary-container/20 blur-3xl" />
+    <section className="relative min-h-screen flex items-center overflow-hidden bg-[#0A1628]">
+      {/* Overlay escuro */}
+      <div className="absolute inset-0 z-10 bg-gradient-to-br from-[#0A1628]/70 via-[#0F2240]/55 to-[#0A1628]/70" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#0A1628]/40 via-transparent to-[#0A1628]/40" />
 
-      <div className="container relative">
-        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          {/* Content */}
+      {/* Slideshow */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentImage}
+          initial={{ opacity: 0, scale: 1.1 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
+          className="absolute inset-0 z-0"
+        >
+          <Image
+            src={HOSPITAL_IMAGES[currentImage].src}
+            alt={HOSPITAL_IMAGES[currentImage].alt}
+            fill
+            className="object-cover"
+            priority={currentImage === 0}
+            sizes="100vw"
+          />
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Dots indicators */}
+      <div className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 gap-2">
+        {HOSPITAL_IMAGES.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentImage(index)}
+            className={`h-1.5 rounded-full transition-all duration-500 ${
+              index === currentImage
+                ? 'w-8 bg-blue-400'
+                : 'w-1.5 bg-white/20 hover:bg-white/40'
+            }`}
+            aria-label={`Imagem ${index + 1}`}
+          />
+        ))}
+      </div>
+
+      {/* Content */}
+      <div className="container relative z-20 pt-24 pb-16 md:pt-0 md:pb-0">
+        <div className="grid items-center gap-12 md:min-h-screen md:grid-cols-2 md:gap-16 lg:gap-24">
+          
+          {/* Left - Text */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-xl"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.9, ease: [0.25, 0.1, 0.25, 1] }}
+            className="pt-8 md:pt-0"
           >
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary-container/10 px-4 py-2">
-              <Eye size={16} className="text-primary-container" />
-              <span className="text-sm font-medium text-primary-container">
-                Serviço de Oftalmologia
-              </span>
-            </div>
+            {/* Badge removed per request */}
 
-            <h1 className="mb-6">
-              A sua{' '}
-              <span className="text-primary-container">saúde ocular</span>{' '}
-              começa aqui
-            </h1>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.8 }}
+              className="mb-6 text-center text-[44px] font-bold leading-[1.08] tracking-[-0.03em] text-white md:text-[60px] lg:text-[72px]"
+            >
+              <span className="bg-gradient-to-r from-blue-300 via-blue-400 to-cyan-300 bg-clip-text text-transparent"></span> Sua visão
+            </motion.h1>
 
-            <p className="mb-8 text-body-lg text-on-surface-variant">
-              Marque a sua consulta de Oftalmologia no Hospital Geral do Uíge
-              de forma rápida, gratuita e sem sair de casa. Atendimento
-              especializado para toda a população.
-            </p>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+              className="mb-10 max-w-md text-base leading-relaxed text-white/60 md:text-lg mx-auto text-center"
+            >
+              Consultas e atendimento de saúde de qualidade com equipamentos modernos 
+              e especialistas dedicados ao cuidado de toda a comunidade.
+            </motion.p>
 
-            <div className="flex flex-col gap-4 sm:flex-row">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.8 }}
+              className="flex flex-col gap-4 sm:flex-row justify-center"
+            >
               <Link
                 href="/agendar"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-base font-semibold text-white transition-all duration-200 hover:bg-primary-container hover:shadow-card-hover"
+                className="group relative inline-flex items-center gap-3 overflow-hidden rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-7 py-4 text-base font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-[0.98]"
               >
-                <Calendar size={20} />
-                Agendar Consulta
-                <ArrowRight size={20} />
+                <span className="relative z-10">Agendar Consulta</span>
+                <ArrowRight size={18} className="relative z-10 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
-              <Link
-                href="/consultar"
-                className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-primary px-8 py-4 text-base font-semibold text-primary transition-all duration-200 hover:bg-primary hover:text-white"
-              >
-                Consultar Marcação
-              </Link>
-            </div>
 
-            {/* Trust Indicators */}
-            <div className="mt-10 flex flex-wrap gap-6">
-              <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-                <Shield size={16} className="text-secondary" />
-                <span>Consulta Gratuita</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-                <Clock size={16} className="text-secondary" />
-                <span>Atendimento Rápido</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-                <Eye size={16} className="text-secondary" />
-                <span>Especialistas</span>
-              </div>
-            </div>
+              <Link
+                href="#stats"
+                className="group relative inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.02] px-7 py-4 text-base font-semibold text-white/70 backdrop-blur-sm transition-all duration-500 hover:border-white/[0.15] hover:bg-white/[0.04] hover:text-white"
+              >
+                Conhecer Resultados
+                <ChevronRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </motion.div>
           </motion.div>
 
-          {/* Hero Image / Visual */}
+          {/* Right - Empty space for balance */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative lg:justify-self-end"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.9, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+            className="relative hidden md:flex md:items-center md:justify-center"
           >
-            <div className="relative">
-              {/* Main Visual Card */}
-              <div className="relative overflow-hidden rounded-2xl bg-primary-container p-8 text-white shadow-card-hover">
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="rounded-full bg-white/20 p-3">
-                    <Eye size={32} />
-                  </div>
-                  <div>
-                    <p className="text-sm text-white/70">Especialidade</p>
-                    <p className="text-xl font-semibold">Oftalmologia</p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="rounded-xl bg-white/10 p-4">
-                    <p className="text-sm text-white/70">Consultas</p>
-                    <p className="text-2xl font-bold">+1,500</p>
-                    <p className="text-sm text-white/70">realizadas este ano</p>
-                  </div>
-                  <div className="rounded-xl bg-white/10 p-4">
-                    <p className="text-sm text-white/70">Médicos</p>
-                    <p className="text-2xl font-bold">7</p>
-                    <p className="text-sm text-white/70">especialistas ativos</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Floating Card */}
-              <div className="absolute -bottom-6 -left-6 rounded-xl bg-white p-4 shadow-card-hover">
-                <div className="flex items-center gap-2">
-                  <div className="rounded-full bg-green-100 p-2">
-                    <Shield size={18} className="text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-on-surface-variant">Status</p>
-                    <p className="text-sm font-semibold text-on-surface">
-                      Aberto para Marcações
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Space for layout balance */}
           </motion.div>
         </div>
       </div>
 
-      {/* Bottom Wave */}
-      <div className="mt-16 h-16 bg-gradient-to-b from-transparent to-surface-container" />
+      <div className="absolute bottom-0 inset-x-0 z-10 h-32 bg-gradient-to-t from-[#0A1628] to-transparent pointer-events-none" />
     </section>
   )
 }

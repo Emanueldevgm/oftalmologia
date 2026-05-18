@@ -1,19 +1,11 @@
-// ============================================
-// API Login Admin (RN20)
-// POST /api/admin/login
-// ============================================
-
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { verifyPassword } from '@/lib/utils/hash'
 import { checkRateLimit } from '@/lib/utils/rate-limit'
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function POST(request: NextRequest) {
   try {
-    const ip =
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-      request.headers.get('x-real-ip') ??
-      '127.0.0.1'
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? '127.0.0.1'
 
     const rateLimit = await checkRateLimit(ip, 5)
     if (!rateLimit.success) {
@@ -53,14 +45,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       )
     }
 
-    // RN25 - Auditoria
-    await supabaseAdmin.from('registros_auditoria').insert({
-      administrador_id: admin.id,
-      acao: 'admin_login',
-      ip,
-    })
-
-    return NextResponse.json({
+    // Criar resposta com cookie de sessão
+    const response = NextResponse.json({
       success: true,
       admin: {
         id: admin.id,
@@ -68,6 +54,24 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         funcao: admin.funcao,
       },
     })
+
+    // Definir cookie seguro
+    response.cookies.set('admin_session', admin.id, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 8, // 8 horas
+      path: '/',
+    })
+
+    // RN25 - Auditoria
+    await supabaseAdmin.from('registros_auditoria').insert({
+      administrador_id: admin.id,
+      acao: 'admin_login',
+      ip,
+    })
+
+    return response
   } catch (error) {
     console.error('Erro no login admin:', error)
     return NextResponse.json(

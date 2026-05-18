@@ -219,7 +219,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       accessPassword,
     })
 
-    await sendEmail(email, 'Confirmação de Consulta - HGU Oftalmologia', emailHtml)
+    await sendEmail(email, 'Confirmação de Consulta - HGU', emailHtml)
 
     // RN25 - Registrar auditoria
     await supabaseAdmin.from('registros_auditoria').insert({

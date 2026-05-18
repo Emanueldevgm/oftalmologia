@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import RootLayoutClient from './RootLayoutClient'
+import { SEO_CONFIG } from '@/config/site'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -11,11 +12,15 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: 'HGU Oftalmologia | Hospital Geral do Uíge',
-    template: '%s | HGU Oftalmologia',
+    default: SEO_CONFIG.defaultTitle,
+    template: SEO_CONFIG.titleTemplate,
   },
-  description:
-    'Marque sua consulta de Oftalmologia no Hospital Geral do Uíge. Atendimento gratuito e especializado em saúde ocular.',
+  description: SEO_CONFIG.description,
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 }
 
 export default function RootLayout({

@@ -55,7 +55,7 @@ export default function AdminLoginPage() {
             Painel Administrativo
           </h1>
           <p className="mt-2 text-on-surface-variant">
-            Hospital Geral do Uíge - Oftalmologia
+            Hospital Geral do Uíge
           </p>
         </div>
 

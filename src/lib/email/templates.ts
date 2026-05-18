@@ -1,5 +1,5 @@
 // ============================================
-// Templates de Email - HGU Oftalmologia
+// Templates de Email - HGU
 // RN11, RN24, RN29
 // ============================================
 
@@ -151,19 +151,19 @@ export function getBookingConfirmationTemplate(data: BookingConfirmationData): s
   <div class="container">
     <div class="header">
       <h1>🏥 Hospital Geral do Uíge</h1>
-      <p>Serviço de Oftalmologia</p>
+      <p>Serviços de Saúde</p>
     </div>
     
     <div class="content">
       <p class="greeting">
         Olá, <strong>${data.nome}</strong>!<br>
-        A sua consulta de Oftalmologia foi <strong>confirmada com sucesso</strong>.
+        A sua consulta foi <strong>confirmada com sucesso</strong>.
       </p>
       
       <div class="info-box">
         <p><strong>📅 Data:</strong> ${data.data}</p>
         <p><strong>⏰ Horário:</strong> ${data.hora}</p>
-        <p><strong>📍 Local:</strong> Hospital Geral do Uíge - Ala de Oftalmologia</p>
+        <p><strong>📍 Local:</strong> Hospital Geral do Uíge</p>
         <p><strong>🏥 Endereço:</strong> Bairro Popular, Rua Principal, Uíge, Angola</p>
       </div>
       
@@ -194,11 +194,11 @@ export function getBookingConfirmationTemplate(data: BookingConfirmationData): s
       <div class="divider"></div>
       
       <div class="contact-info">
-        <strong>📞 Contactos do Hospital:</strong><br>
-        Telefone: +244 934 567 890<br>
-        Email: oftalmologia@hgu.gov.ao<br>
-        Horário: Seg-Sex, 08:00 - 16:00
-      </div>
+          <strong>📞 Contactos do Hospital:</strong><br>
+          Telefone: +244 934 567 890<br>
+          Email: contato@hgu.gov.ao<br>
+          Horário: Seg-Sex, 08:00 - 16:00
+        </div>
     </div>
     
     <div class="footer">
@@ -272,7 +272,7 @@ export function getReminderTemplate(data: ReminderData): string {
   <div class="container">
     <div class="header">
       <h1>🔔 Lembrete de Consulta</h1>
-      <p>Hospital Geral do Uíge - Oftalmologia</p>
+      <p>Hospital Geral do Uíge</p>
     </div>
     
     <div class="content">
@@ -280,13 +280,13 @@ export function getReminderTemplate(data: ReminderData): string {
         Olá, <strong>${data.nome}</strong>!
       </p>
       <p style="color: #4a5568; margin-bottom: 20px;">
-        A sua consulta de Oftalmologia está marcada para <strong>amanhã</strong>. Confira os detalhes:
+        A sua consulta está marcada para <strong>amanhã</strong>. Confira os detalhes:
       </p>
       
       <div class="info-box">
         <p><strong>📅 Data:</strong> ${data.data}</p>
         <p><strong>⏰ Horário:</strong> ${data.hora}</p>
-        <p><strong>📍 Local:</strong> Hospital Geral do Uíge - Ala de Oftalmologia</p>
+        <p><strong>📍 Local:</strong> Hospital Geral do Uíge</p>
       </div>
       
       <div style="background: #fff5f5; border: 1px solid #feb2b2; border-radius: 8px; padding: 15px; margin: 20px 0;">

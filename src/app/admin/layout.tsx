@@ -12,7 +12,7 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-surface-secondary">
       {children}
     </div>
   )

@@ -108,27 +108,39 @@ export default function AgendarPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface py-8 md:py-12">
+    <div className="min-h-screen bg-surface-secondary pt-24 pb-16 md:pt-32 md:pb-24">
       <div className="container">
         {/* Breadcrumb */}
-        <div className="mb-6">
+        <div className="mb-8">
           <Link href="/" className="text-sm text-primary hover:underline">
             Início
           </Link>
-          <span className="mx-2 text-outline">/</span>
-          <span className="text-sm text-on-surface-variant">Agendar Consulta</span>
+          <span className="mx-2 text-text-tertiary">/</span>
+          <span className="text-sm text-text-secondary">Agendar Consulta</span>
+        </div>
+
+        {/* Header */}
+        <div className="mb-10 text-center">
+          <h1 className="mb-3 text-4xl font-bold tracking-tight text-text-primary md:text-5xl">
+            Agendar Consulta
+          </h1>
+          <p className="mx-auto max-w-lg text-text-secondary">
+            Escolha a data, horário e preencha seus dados para marcar sua consulta oftalmológica gratuita.
+          </p>
         </div>
 
         {/* Stepper */}
-        <BookingStepper currentStep={step} />
+        <div className="mb-12">
+          <BookingStepper currentStep={step} />
+        </div>
 
-        <div className="mt-8">
+        <div className="mx-auto max-w-4xl">
           {/* STEP 1: Escolher Data e Hora */}
           {step === 1 && (
             <div className="grid gap-8 lg:grid-cols-2">
               <div>
-                <h2 className="mb-4 flex items-center gap-2 text-2xl font-semibold">
-                  <CalendarIcon size={24} className="text-primary" />
+                <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-text-primary">
+                  <CalendarIcon size={22} className="text-primary" />
                   Escolha a data
                 </h2>
                 <Calendar
@@ -139,8 +151,8 @@ export default function AgendarPage() {
               <div>
                 {selectedDate && (
                   <>
-                    <h2 className="mb-4 flex items-center gap-2 text-2xl font-semibold">
-                      <Clock size={24} className="text-primary" />
+                    <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-text-primary">
+                      <Clock size={22} className="text-primary" />
                       Escolha o horário
                     </h2>
                     <SlotSelector
@@ -151,8 +163,8 @@ export default function AgendarPage() {
                   </>
                 )}
                 {!selectedDate && (
-                  <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-outline-variant bg-white p-12">
-                    <p className="text-center text-on-surface-variant">
+                  <div className="flex h-full min-h-[200px] items-center justify-center rounded-2xl border border-dashed border-border bg-white p-8">
+                    <p className="text-center text-sm text-text-tertiary">
                       Selecione uma data no calendário para ver os horários disponíveis.
                     </p>
                   </div>
@@ -163,9 +175,9 @@ export default function AgendarPage() {
 
           {/* STEP 2: Dados Pessoais */}
           {step === 2 && selectedSlot && (
-            <div className="mx-auto max-w-2xl">
-              <h2 className="mb-4 flex items-center gap-2 text-2xl font-semibold">
-                <User size={24} className="text-primary" />
+            <div>
+              <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-text-primary">
+                <User size={22} className="text-primary" />
                 Seus dados
               </h2>
               <PatientForm
@@ -179,62 +191,62 @@ export default function AgendarPage() {
 
           {/* STEP 3: Confirmar */}
           {step === 3 && selectedSlot && patientData && (
-            <div className="mx-auto max-w-2xl">
-              <h2 className="mb-4 flex items-center gap-2 text-2xl font-semibold">
-                <CheckCircle size={24} className="text-primary" />
+            <div>
+              <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-text-primary">
+                <CheckCircle size={22} className="text-primary" />
                 Confirmar consulta
               </h2>
 
-              <div className="rounded-xl border border-outline-variant bg-white p-6">
+              <div className="rounded-2xl border border-border bg-white p-6 shadow-sm md:p-8">
                 {/* Resumo */}
-                <div className="mb-6 space-y-3 rounded-xl bg-surface-container p-4">
-                  <h3 className="text-sm font-semibold text-on-surface">
+                <div className="mb-6 rounded-xl bg-surface-secondary p-5">
+                  <h3 className="mb-4 text-sm font-semibold text-text-primary">
                     Resumo da Consulta
                   </h3>
-                  <div className="grid gap-2 text-sm sm:grid-cols-2">
+                  <div className="grid gap-3 text-sm sm:grid-cols-2">
                     <div>
-                      <span className="text-on-surface-variant">Data:</span>
-                      <p className="font-medium text-on-surface">
+                      <span className="text-text-tertiary">Data:</span>
+                      <p className="font-medium text-text-primary">
                         {formatDisplayDate(selectedDate)}
                       </p>
                     </div>
                     <div>
-                      <span className="text-on-surface-variant">Horário:</span>
-                      <p className="font-medium text-on-surface">
+                      <span className="text-text-tertiary">Horário:</span>
+                      <p className="font-medium text-text-primary">
                         {selectedSlot.horaInicio} - {selectedSlot.horaFim}
                       </p>
                     </div>
                     <div>
-                      <span className="text-on-surface-variant">Médico:</span>
-                      <p className="font-medium text-on-surface">
+                      <span className="text-text-tertiary">Médico:</span>
+                      <p className="font-medium text-text-primary">
                         {selectedSlot.medicoNome}
                       </p>
                     </div>
                     <div>
-                      <span className="text-on-surface-variant">Paciente:</span>
-                      <p className="font-medium text-on-surface">
+                      <span className="text-text-tertiary">Paciente:</span>
+                      <p className="font-medium text-text-primary">
                         {patientData.nome}
                       </p>
                     </div>
                     <div>
-                      <span className="text-on-surface-variant">BI:</span>
-                      <p className="font-medium text-on-surface">
+                      <span className="text-text-tertiary">BI:</span>
+                      <p className="font-medium text-text-primary">
                         {patientData.bi}
                       </p>
                     </div>
                     <div>
-                      <span className="text-on-surface-variant">Email:</span>
-                      <p className="font-medium text-on-surface">
+                      <span className="text-text-tertiary">Email:</span>
+                      <p className="font-medium text-text-primary">
                         {patientData.email}
                       </p>
                     </div>
                   </div>
                   {patientData.motivo && (
-                    <div>
-                      <span className="text-sm text-on-surface-variant">
+                    <div className="mt-3 border-t border-border pt-3">
+                      <span className="text-sm text-text-tertiary">
                         Motivo:
                       </span>
-                      <p className="text-sm text-on-surface">
+                      <p className="text-sm text-text-primary">
                         {patientData.motivo}
                       </p>
                     </div>
@@ -242,8 +254,8 @@ export default function AgendarPage() {
                 </div>
 
                 {/* Aviso */}
-                <div className="mb-6 rounded-xl bg-warning/10 border border-warning/30 p-4">
-                  <p className="text-sm font-medium text-warning">
+                <div className="mb-6 rounded-xl bg-amber-50 border border-amber-200 p-4">
+                  <p className="text-sm font-medium text-amber-700">
                     ⚠️ Chegue com 15 minutos de antecedência. Atraso superior a 10 minutos pode resultar na perda da vaga.
                   </p>
                 </div>
@@ -252,7 +264,7 @@ export default function AgendarPage() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => setStep(2)}
-                    className="flex items-center gap-2 rounded-full border-2 border-primary px-6 py-3 text-sm font-semibold text-primary transition hover:bg-primary hover:text-white"
+                    className="flex items-center gap-2 rounded-xl border-2 border-border px-6 py-3 text-sm font-semibold text-text-secondary transition hover:border-primary hover:text-primary"
                   >
                     <ArrowLeft size={18} />
                     Voltar
@@ -260,7 +272,7 @@ export default function AgendarPage() {
                   <button
                     onClick={handleConfirm}
                     disabled={loading}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary-container disabled:opacity-50"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.01] disabled:opacity-50"
                   >
                     {loading ? (
                       <>
@@ -296,59 +308,59 @@ export default function AgendarPage() {
 
           {/* STEP 4: Sucesso */}
           {step === 4 && confirmedConsult && (
-            <div className="mx-auto max-w-lg text-center">
-              <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
-                <CheckCircle size={40} className="text-green-600" />
+            <div className="text-center">
+              <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-emerald-50 shadow-sm">
+                <CheckCircle size={40} className="text-emerald-600" />
               </div>
-              <h2 className="mb-2 text-2xl font-semibold text-on-surface">
+              <h2 className="mb-2 text-3xl font-bold text-text-primary">
                 Consulta Marcada!
               </h2>
-              <p className="mb-6 text-on-surface-variant">
+              <p className="mb-8 text-text-secondary">
                 Sua consulta foi agendada com sucesso.
               </p>
 
-              <div className="mb-6 rounded-xl bg-surface-container p-4 text-left">
-                <div className="space-y-2 text-sm">
+              <div className="mb-6 rounded-2xl border border-border bg-white p-6 text-left shadow-sm">
+                <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-on-surface-variant">Data:</span>
-                    <span className="font-medium text-on-surface">
+                    <span className="text-text-tertiary">Data:</span>
+                    <span className="font-medium text-text-primary">
                       {confirmedConsult.data}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-on-surface-variant">Hora:</span>
-                    <span className="font-medium text-on-surface">
+                    <span className="text-text-tertiary">Hora:</span>
+                    <span className="font-medium text-text-primary">
                       {confirmedConsult.hora}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-on-surface-variant">Médico:</span>
-                    <span className="font-medium text-on-surface">
+                    <span className="text-text-tertiary">Médico:</span>
+                    <span className="font-medium text-text-primary">
                       {selectedSlot?.medicoNome}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="mb-6 rounded-xl bg-primary-fixed/20 p-4 text-left">
+              <div className="mb-8 rounded-2xl bg-blue-50 border border-blue-200 p-5 text-left">
                 <p className="text-sm font-medium text-primary">
                   📧 Verifique seu email!
                 </p>
-                <p className="mt-1 text-sm text-on-surface-variant">
+                <p className="mt-1 text-sm text-text-secondary">
                   Enviamos para <strong>{patientData?.email}</strong> a sua senha de acesso e o link para cancelamento.
                 </p>
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <button
                   onClick={handleReset}
-                  className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary-container"
+                  className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.01]"
                 >
                   Marcar Nova Consulta
                 </button>
                 <Link
                   href="/"
-                  className="rounded-full border-2 border-primary px-6 py-3 text-center text-sm font-semibold text-primary transition hover:bg-primary hover:text-white"
+                  className="rounded-xl border-2 border-border px-6 py-3 text-center text-sm font-semibold text-text-secondary transition hover:border-primary hover:text-primary"
                 >
                   Voltar ao Início
                 </Link>

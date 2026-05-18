@@ -9,13 +9,11 @@ import {
   FileText,
   Lock,
   Search,
-  ArrowLeft,
   AlertTriangle,
   CheckCircle,
   Loader2,
 } from 'lucide-react'
 
-// Componente interno que usa useSearchParams
 function CancelarContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -54,14 +52,6 @@ function CancelarContent() {
     setError('')
 
     try {
-      // Primeiro buscar consulta pelo token para obter o ID
-      const searchResponse = await fetch(
-        `/api/appointments?token=${token}`
-      )
-      
-      // Como não temos endpoint de busca por token, vamos direto para o cancelamento
-      // O token está no link do email, mas precisamos do ID da consulta
-      // Vamos usar o endpoint de cancelamento que aceita token
       const response = await fetch(`/api/appointments/cancel-by-token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -107,7 +97,6 @@ function CancelarContent() {
     setError('')
 
     try {
-      // Primeiro buscar consultas do paciente
       const consultasResponse = await fetch(
         `/api/patient/consultas?bi=${bi.toUpperCase().trim()}&senha=${senha}`
       )
@@ -119,7 +108,6 @@ function CancelarContent() {
         return
       }
 
-      // Pegar a primeira consulta confirmada
       const consultaAtiva = consultasData.consultas.find(
         (c: { status: string }) => c.status === 'confirmada'
       )
@@ -130,7 +118,6 @@ function CancelarContent() {
         return
       }
 
-      // Cancelar a consulta
       const cancelResponse = await fetch(
         `/api/appointments/${consultaAtiva.id}/cancel`,
         {
@@ -182,43 +169,54 @@ function CancelarContent() {
   // Tela de sucesso
   if (success) {
     return (
-      <div className="min-h-screen bg-surface py-8 md:py-12">
+      <div className="min-h-screen bg-surface-secondary pt-24 pb-16 md:pt-32 md:pb-24">
         <div className="container">
+          {/* Breadcrumb */}
+          <div className="mb-8">
+            <Link href="/" className="text-sm text-primary hover:underline">
+              Início
+            </Link>
+            <span className="mx-2 text-text-tertiary">/</span>
+            <span className="text-sm text-text-secondary">Cancelar Consulta</span>
+          </div>
+
           <div className="mx-auto max-w-lg text-center">
-            <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle size={40} className="text-green-600" />
+            <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-emerald-50 shadow-sm">
+              <CheckCircle size={40} className="text-emerald-600" />
             </div>
-            <h1 className="mb-2 text-2xl font-bold text-on-surface">
+            <h1 className="mb-2 text-3xl font-bold text-text-primary">
               Consulta Cancelada
             </h1>
-            <p className="mb-6 text-on-surface-variant">
+            <p className="mb-8 text-text-secondary">
               Sua consulta foi cancelada com sucesso.
             </p>
 
             {consultaInfo && (
-              <div className="mb-6 rounded-xl bg-surface-container p-4 text-left">
-                <p className="text-sm text-on-surface-variant">
-                  <strong>Data:</strong> {consultaInfo.data}
-                </p>
-                <p className="text-sm text-on-surface-variant">
-                  <strong>Hora:</strong> {consultaInfo.hora}
-                </p>
-                <p className="text-sm text-on-surface-variant">
-                  <strong>Médico:</strong> {consultaInfo.medico}
-                </p>
+              <div className="mb-8 rounded-2xl border border-border bg-white p-5 text-left shadow-sm">
+                <div className="space-y-2 text-sm">
+                  <p className="text-text-secondary">
+                    <strong className="text-text-primary">Data:</strong> {consultaInfo.data}
+                  </p>
+                  <p className="text-text-secondary">
+                    <strong className="text-text-primary">Hora:</strong> {consultaInfo.hora}
+                  </p>
+                  <p className="text-text-secondary">
+                    <strong className="text-text-primary">Médico:</strong> {consultaInfo.medico}
+                  </p>
+                </div>
               </div>
             )}
 
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Link
                 href="/agendar"
-                className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary-container"
+                className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.01]"
               >
                 Marcar Nova Consulta
               </Link>
               <Link
                 href="/"
-                className="rounded-full border-2 border-primary px-6 py-3 text-sm font-semibold text-primary transition hover:bg-primary hover:text-white"
+                className="rounded-xl border-2 border-border px-6 py-3 text-sm font-semibold text-text-secondary transition hover:border-primary hover:text-primary"
               >
                 Voltar ao Início
               </Link>
@@ -230,82 +228,83 @@ function CancelarContent() {
   }
 
   return (
-    <div className="min-h-screen bg-surface py-8 md:py-12">
+    <div className="min-h-screen bg-surface-secondary pt-24 pb-16 md:pt-32 md:pb-24">
       <div className="container">
         {/* Breadcrumb */}
-        <div className="mb-6">
+        <div className="mb-8">
           <Link href="/" className="text-sm text-primary hover:underline">
             Início
           </Link>
-          <span className="mx-2 text-outline">/</span>
-          <span className="text-sm text-on-surface-variant">
+          <span className="mx-2 text-text-tertiary">/</span>
+          <span className="text-sm text-text-secondary">
             Cancelar Consulta
           </span>
         </div>
 
         <div className="mx-auto max-w-lg">
-          <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-error/10">
-              <XCircle size={32} className="text-error" />
+          {/* Header */}
+          <div className="mb-10 text-center">
+            <div className="mx-auto mb-5 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 shadow-sm">
+              <XCircle size={28} className="text-red-600" />
             </div>
-            <h1 className="mb-2 text-3xl font-bold text-on-surface">
+            <h1 className="mb-3 text-4xl font-bold tracking-tight text-text-primary md:text-5xl">
               Cancelar Consulta
             </h1>
-            <p className="text-on-surface-variant">
+            <p className="mx-auto max-w-md text-text-secondary">
               Cancele sua consulta usando o link recebido por email ou o seu BI
               + senha de acesso.
             </p>
           </div>
 
           {/* Tabs */}
-          <div className="mb-6 flex rounded-full bg-surface-container p-1">
+          <div className="mb-6 flex rounded-xl bg-surface-tertiary p-1">
             <button
               onClick={() => setActiveTab('token')}
-              className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition ${
+              className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
                 activeTab === 'token'
                   ? 'bg-white text-primary shadow-sm'
-                  : 'text-on-surface-variant hover:text-on-surface'
+                  : 'text-text-tertiary hover:text-text-secondary'
               }`}
             >
-              <Search size={16} className="mr-1 inline" />
+              <Search size={16} />
               Pelo Token
             </button>
             <button
               onClick={() => setActiveTab('bisenha')}
-              className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition ${
+              className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
                 activeTab === 'bisenha'
                   ? 'bg-white text-primary shadow-sm'
-                  : 'text-on-surface-variant hover:text-on-surface'
+                  : 'text-text-tertiary hover:text-text-secondary'
               }`}
             >
-              <Lock size={16} className="mr-1 inline" />
+              <Lock size={16} />
               BI + Senha
             </button>
           </div>
 
           {/* Form */}
-          <div className="rounded-xl border border-outline-variant bg-white p-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="rounded-2xl border border-border bg-white p-6 shadow-sm md:p-8">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {activeTab === 'token' ? (
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-on-surface">
+                  <label className="mb-2 block text-sm font-medium text-text-primary">
                     Token de Cancelamento
                   </label>
                   <div className="relative">
                     <Search
                       size={18}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary"
                     />
                     <input
                       type="text"
                       value={token}
                       onChange={(e) => setToken(e.target.value)}
                       placeholder="Cole o token do email"
-                      className="w-full rounded-xl border border-outline-variant py-3 pl-10 pr-4 text-sm text-on-surface outline-none transition focus:ring-2 focus:ring-primary"
+                      className="w-full rounded-xl border border-border py-3 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-tertiary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                       required
                     />
                   </div>
-                  <p className="mt-2 text-xs text-on-surface-variant">
+                  <p className="mt-2 text-xs text-text-tertiary">
                     Encontre o token no link de cancelamento enviado por email
                     após a marcação.
                   </p>
@@ -313,13 +312,13 @@ function CancelarContent() {
               ) : (
                 <>
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-on-surface">
+                    <label className="mb-2 block text-sm font-medium text-text-primary">
                       Número do BI
                     </label>
                     <div className="relative">
                       <FileText
                         size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary"
                       />
                       <input
                         type="text"
@@ -327,20 +326,20 @@ function CancelarContent() {
                         onChange={(e) => setBi(e.target.value.toUpperCase())}
                         placeholder="001234567LA000"
                         maxLength={14}
-                        className="w-full rounded-xl border border-outline-variant py-3 pl-10 pr-4 text-sm text-on-surface outline-none transition focus:ring-2 focus:ring-primary"
+                        className="w-full rounded-xl border border-border py-3 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-tertiary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                         required
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-on-surface">
+                    <label className="mb-2 block text-sm font-medium text-text-primary">
                       Senha de Acesso (4 dígitos)
                     </label>
                     <div className="relative">
                       <Lock
                         size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary"
                       />
                       <input
                         type="password"
@@ -350,7 +349,7 @@ function CancelarContent() {
                         }
                         placeholder="4829"
                         maxLength={4}
-                        className="w-full rounded-xl border border-outline-variant py-3 pl-10 pr-4 text-center text-2xl tracking-[8px] text-on-surface outline-none transition focus:ring-2 focus:ring-primary"
+                        className="w-full rounded-xl border border-border py-3 pl-10 pr-4 text-center text-2xl tracking-[8px] text-text-primary placeholder:text-text-tertiary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                         required
                       />
                     </div>
@@ -360,9 +359,9 @@ function CancelarContent() {
 
               {/* Error */}
               {error && (
-                <div className="flex items-center gap-2 rounded-xl bg-error-container/20 p-3">
-                  <AlertTriangle size={18} className="text-error" />
-                  <p className="text-sm text-error">{error}</p>
+                <div className="flex items-center gap-3 rounded-xl bg-red-50 border border-red-200 p-4">
+                  <AlertTriangle size={18} className="text-red-600 shrink-0" />
+                  <p className="text-sm text-red-700">{error}</p>
                 </div>
               )}
 
@@ -370,7 +369,7 @@ function CancelarContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-error px-6 py-3 text-base font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-red-600/20 transition-all duration-300 hover:bg-red-700 hover:shadow-xl hover:shadow-red-600/30 hover:scale-[1.01] disabled:opacity-50"
               >
                 {loading ? (
                   <>
@@ -389,7 +388,7 @@ function CancelarContent() {
 
           {/* Ajuda */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-on-surface-variant">
+            <p className="text-sm text-text-tertiary">
               Perdeu sua senha?{' '}
               <Link
                 href="/agendar"
@@ -411,7 +410,7 @@ export default function CancelarPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center">
+        <div className="flex min-h-screen items-center justify-center bg-surface-secondary">
           <Loader2 size={40} className="animate-spin text-primary" />
         </div>
       }

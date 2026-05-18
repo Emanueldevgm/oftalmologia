@@ -50,7 +50,7 @@ export default function SignIn() {
             Painel Administrativo
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Hospital Geral do Uíge - Oftalmologia
+            Hospital Geral do Uíge
           </p>
         </div>
 
