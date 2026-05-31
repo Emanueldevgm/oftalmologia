@@ -7,10 +7,11 @@ export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? '127.0.0.1'
 
-    const rateLimit = await checkRateLimit(ip, 5)
+    // Rate limit: 10 tentativas a cada 1 minuto
+    const rateLimit = await checkRateLimit(ip, 10, 60)
     if (!rateLimit.success) {
       return NextResponse.json(
-        { error: 'Muitas tentativas. Tente novamente em 1 hora.' },
+        { error: `Muitas tentativas. Tente novamente em ${rateLimit.resetIn} segundos.` },
         { status: 429 }
       )
     }

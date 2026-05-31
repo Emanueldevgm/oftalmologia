@@ -1,11 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import { useState } from 'react'
-import { Eye, ArrowLeft, Search } from 'lucide-react'
+import { ArrowLeft, Search, Lock } from 'lucide-react'
 import Link from 'next/link'
 import LoginForm from '@/app/components/Patient/LoginForm'
 import ConsultasList from '@/app/components/Patient/ConsultasList'
+import ChangePasswordModal from '@/app/components/Patient/ChangePasswordModal'
 
 interface PacienteData {
   bi: string
@@ -17,6 +17,7 @@ export default function ConsultarPage() {
   const [pacienteData, setPacienteData] = useState<PacienteData | null>(null)
   const [bi, setBi] = useState('')
   const [senha, setSenha] = useState('')
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false)
 
   const handleLoginSuccess = (data: PacienteData, biValue: string, senhaValue: string) => {
     setPacienteData(data)
@@ -32,10 +33,14 @@ export default function ConsultarPage() {
     setSenha('')
   }
 
+  const handlePasswordChanged = (novaSenha: string) => {
+    setSenha(novaSenha)
+    setChangePasswordOpen(false)
+  }
+
   return (
     <div className="min-h-screen bg-surface-secondary pt-24 pb-16 md:pt-32 md:pb-24">
       <div className="container">
-        {/* Breadcrumb */}
         <div className="mb-8">
           <Link href="/" className="text-sm text-primary hover:underline">
             Início
@@ -49,7 +54,6 @@ export default function ConsultarPage() {
         <div className="mx-auto max-w-2xl">
           {!isLoggedIn ? (
             <>
-              {/* Header */}
               <div className="mb-10 text-center">
                 <div className="mx-auto mb-5 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 shadow-sm">
                   <Search size={28} className="text-primary" />
@@ -67,8 +71,7 @@ export default function ConsultarPage() {
             </>
           ) : (
             <>
-              {/* Header logado */}
-              <div className="mb-8 flex items-center justify-between">
+              <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h1 className="text-3xl font-bold text-text-primary">
                     Minhas Consultas
@@ -77,13 +80,22 @@ export default function ConsultarPage() {
                     Bem-vindo, {pacienteData?.nome}!
                   </p>
                 </div>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 rounded-xl border-2 border-border px-4 py-2.5 text-sm font-semibold text-text-secondary transition hover:border-primary hover:text-primary"
-                >
-                  <ArrowLeft size={16} />
-                  Sair
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setChangePasswordOpen(true)}
+                    className="flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-text-secondary transition hover:border-primary hover:text-primary"
+                  >
+                    <Lock size={16} />
+                    Alterar Senha
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 rounded-xl border-2 border-border px-4 py-2.5 text-sm font-semibold text-text-secondary transition hover:border-primary hover:text-primary"
+                  >
+                    <ArrowLeft size={16} />
+                    Sair
+                  </button>
+                </div>
               </div>
 
               <ConsultasList bi={bi} senha={senha} />
@@ -91,6 +103,16 @@ export default function ConsultarPage() {
           )}
         </div>
       </div>
+
+      {isLoggedIn && (
+        <ChangePasswordModal
+          isOpen={changePasswordOpen}
+          onClose={() => setChangePasswordOpen(false)}
+          bi={bi}
+          senhaAtual={senha}
+          onPasswordChanged={handlePasswordChanged}
+        />
+      )}
     </div>
   )
 }

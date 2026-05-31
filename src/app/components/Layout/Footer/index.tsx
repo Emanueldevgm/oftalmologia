@@ -10,7 +10,7 @@ const FOOTER_LINKS = [
   { href: '/agendar', label: 'Agendar Consulta' },
   { href: '/consultar', label: 'Consultar Marcação' },
   { href: '/cancelar', label: 'Cancelar' },
-  { href: '/admin/login', label: 'Painel Admin' },
+  { href: '/admin/login', label: '.' },
 ]
 
 export default function Footer() {

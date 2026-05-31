@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
@@ -5,7 +6,7 @@ import { useState, useEffect } from 'react'
 import AdminLayout from '@/app/components/Admin/AdminLayout'
 import ProtectedRoute from '@/app/components/Shared/ProtectedRoute'
 import DoctorsList from '@/app/components/Admin/Doctors/DoctorsList'
-import { Plus, X, Stethoscope, Upload, Trash2, LayoutGrid, List } from 'lucide-react'
+import { Plus, X, Stethoscope, Upload, Trash2, LayoutGrid, List, CheckCircle2, XCircle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface Medico {
@@ -25,7 +26,8 @@ export default function MedicosPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [uploading, setUploading] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table') // Toggle visualização
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table')
   const [formData, setFormData] = useState({
     nome: '',
     crm: '',
@@ -49,21 +51,48 @@ export default function MedicosPage() {
 
   useEffect(() => { fetchMedicos() }, [])
 
+  const resetForm = () => {
+    setFormData({ nome: '', crm: '', especialidade: '', turno_manha: true, turno_tarde: false, vagas_por_turno: 9 })
+    setEditingId(null)
+    setShowForm(false)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
     try {
-      const response = await fetch('/api/admin/doctors', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-      if (response.ok) {
-        setShowForm(false)
-        setFormData({ nome: '', crm: '', especialidade: '', turno_manha: true, turno_tarde: false, vagas_por_turno: 9 })
-        fetchMedicos()
+      if (editingId) {
+        const response = await fetch(`/api/admin/doctors/${editingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        })
+
+        if (response.ok) {
+          resetForm()
+          fetchMedicos()
+        } else {
+          const data = await response.json()
+          alert(data.error || 'Erro ao atualizar médico')
+        }
+      } else {
+        const response = await fetch('/api/admin/doctors', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        })
+
+        if (response.ok) {
+          resetForm()
+          fetchMedicos()
+        } else {
+          const data = await response.json()
+          alert(data.error || 'Erro ao cadastrar médico')
+        }
       }
     } catch (error) {
-      console.error('Erro ao cadastrar:', error)
+      console.error('Erro ao salvar:', error)
+      alert('Erro de conexão ao salvar')
     }
   }
 
@@ -80,19 +109,55 @@ export default function MedicosPage() {
     }
   }
 
-  const handleDelete = async (medico: Medico) => {
+  const handleActivate = async (medicoId: string) => {
     try {
-      await fetch(`/api/admin/doctors/${medico.id}`, {
-        method: 'DELETE',
+      await fetch(`/api/admin/doctors/${medicoId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ativo: true }),
       })
       fetchMedicos()
     } catch (error) {
-      console.error('Erro ao remover:', error)
+      console.error('Erro ao ativar:', error)
+    }
+  }
+
+  const handleDelete = async (medico: Medico) => {
+    if (medico.ativo) {
+      try {
+        const response = await fetch(`/api/admin/doctors/${medico.id}`, {
+          method: 'DELETE',
+        })
+        const data = await response.json()
+        if (data.success) {
+          fetchMedicos()
+        } else {
+          alert(data.error || 'Erro ao desativar médico')
+        }
+      } catch (error) {
+        console.error('Erro ao desativar:', error)
+      }
+    } else {
+      if (!confirm('Este médico já está inativo. Deseja eliminá-lo PERMANENTEMENTE? Esta ação não pode ser desfeita.')) return
+
+      try {
+        const response = await fetch(`/api/admin/doctors/${medico.id}?force=true`, {
+          method: 'DELETE',
+        })
+        const data = await response.json()
+
+        if (data.success) {
+          fetchMedicos()
+        } else {
+          alert(data.error || 'Erro ao eliminar médico')
+        }
+      } catch (error) {
+        console.error('Erro ao eliminar:', error)
+      }
     }
   }
 
   const handleEdit = (medico: Medico) => {
-    // Preencher formulário e abrir
     setFormData({
       nome: medico.nome,
       crm: medico.crm,
@@ -101,9 +166,8 @@ export default function MedicosPage() {
       turno_tarde: medico.turno_tarde,
       vagas_por_turno: medico.vagas_por_turno,
     })
+    setEditingId(medico.id)
     setShowForm(true)
-    // TODO: atualizar médico via PUT, não só POST
-    // Pode ser adaptado para um modal de edição separado
   }
 
   const handlePhotoUpload = async (medicoId: string, file: File) => {
@@ -157,7 +221,6 @@ export default function MedicosPage() {
               <p className="text-text-secondary">Gerir equipa médica e fotos</p>
             </div>
             <div className="flex items-center gap-3">
-              {/* Toggle de visualização */}
               <div className="flex rounded-xl bg-surface-secondary p-1">
                 <button
                   onClick={() => setViewMode('table')}
@@ -181,7 +244,13 @@ export default function MedicosPage() {
                 </button>
               </div>
               <button
-                onClick={() => setShowForm(!showForm)}
+                onClick={() => {
+                  if (showForm) {
+                    resetForm()
+                  } else {
+                    setShowForm(true)
+                  }
+                }}
                 className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:bg-primary-dark"
               >
                 {showForm ? <X size={18} /> : <Plus size={18} />}
@@ -190,7 +259,7 @@ export default function MedicosPage() {
             </div>
           </div>
 
-          {/* Formulário de Cadastro/Edição */}
+          {/* Formulário */}
           <AnimatePresence>
             {showForm && (
               <motion.div
@@ -201,6 +270,14 @@ export default function MedicosPage() {
                 className="overflow-hidden"
               >
                 <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-50">
+                      <Stethoscope size={18} className="text-primary" />
+                    </div>
+                    <h3 className="text-sm font-semibold uppercase tracking-wider text-text-tertiary">
+                      {editingId ? 'Editar Médico' : 'Novo Médico'}
+                    </h3>
+                  </div>
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div>
@@ -238,7 +315,7 @@ export default function MedicosPage() {
                         <input
                           type="number"
                           value={formData.vagas_por_turno}
-                          onChange={(e) => setFormData({ ...formData, vagas_por_turno: parseInt(e.target.value) })}
+                          onChange={(e) => setFormData({ ...formData, vagas_por_turno: parseInt(e.target.value) || 1 })}
                           className="w-full rounded-xl border border-border px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
                           min={1}
                           max={20}
@@ -268,15 +345,26 @@ export default function MedicosPage() {
                     <div className="flex gap-3">
                       <button
                         type="submit"
-                        className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:bg-primary-dark"
+                        className="flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:bg-primary-dark"
                       >
-                        {formData.nome ? 'Atualizar Médico' : 'Cadastrar Médico'}
+                        {editingId ? (
+                          <>
+                            <CheckCircle2 size={16} />
+                            Atualizar Médico
+                          </>
+                        ) : (
+                          <>
+                            <Plus size={16} />
+                            Cadastrar Médico
+                          </>
+                        )}
                       </button>
                       <button
                         type="button"
-                        onClick={() => setShowForm(false)}
-                        className="rounded-xl border border-border px-6 py-2.5 text-sm font-semibold text-text-secondary transition hover:bg-surface-secondary"
+                        onClick={resetForm}
+                        className="flex items-center gap-2 rounded-xl border border-border px-6 py-2.5 text-sm font-semibold text-text-secondary transition hover:bg-surface-secondary"
                       >
+                        <X size={16} />
                         Cancelar
                       </button>
                     </div>
@@ -299,9 +387,9 @@ export default function MedicosPage() {
               onEdit={handleEdit}
               onDelete={handleDelete}
               onToggleStatus={toggleStatus}
+              onActivate={handleActivate}
             />
           ) : (
-            /* Grid de Cards (mantida para alternativa) */
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {medicos.map((medico) => (
                 <motion.div
@@ -346,20 +434,53 @@ export default function MedicosPage() {
                     </div>
                   </div>
                   <div className="space-y-1.5 text-sm text-text-secondary">
-                    <p>Manhã: {medico.turno_manha ? '✅ Sim' : '❌ Não'}</p>
-                    <p>Tarde: {medico.turno_tarde ? '✅ Sim' : '❌ Não'}</p>
+                    <div className="flex items-center gap-2">
+                      {medico.turno_manha ? (
+                        <CheckCircle2 size={14} className="text-emerald-500" />
+                      ) : (
+                        <XCircle size={14} className="text-text-tertiary" />
+                      )}
+                      <span>Manhã</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {medico.turno_tarde ? (
+                        <CheckCircle2 size={14} className="text-emerald-500" />
+                      ) : (
+                        <XCircle size={14} className="text-text-tertiary" />
+                      )}
+                      <span>Tarde</span>
+                    </div>
                     <p>Vagas: {medico.vagas_por_turno}/turno</p>
                   </div>
-                  <button
-                    onClick={() => toggleStatus(medico.id, medico.ativo)}
-                    className={`mt-3 w-full rounded-xl px-4 py-1.5 text-xs font-semibold transition ${
-                      medico.ativo
-                        ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                        : 'bg-red-50 text-red-700 hover:bg-red-100'
-                    }`}
-                  >
-                    {medico.ativo ? '🟢 Ativo' : '🔴 Inativo'} — Clique para alternar
-                  </button>
+                  <div className="mt-3 space-y-2">
+                    {medico.ativo ? (
+                      <button
+                        onClick={() => toggleStatus(medico.id, medico.ativo)}
+                        className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-emerald-50 px-4 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                      >
+                        <CheckCircle2 size={12} />
+                        Ativo
+                        <span className="opacity-60">— Clique para desativar</span>
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => handleActivate(medico.id)}
+                          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-emerald-50 px-4 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                        >
+                          <CheckCircle2 size={12} />
+                          Ativar Médico
+                        </button>
+                        <button
+                          onClick={() => handleDelete(medico)}
+                          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-red-50 px-4 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+                        >
+                          <Trash2 size={12} />
+                          Eliminar Permanentemente
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </motion.div>
               ))}
             </div>

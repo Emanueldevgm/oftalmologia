@@ -1,9 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Stethoscope, Search, Plus, Pencil, Trash2, ChevronLeft, ChevronRight, X, Check } from 'lucide-react'
+import { Stethoscope, Search, Plus, Pencil, Trash2, ChevronLeft, ChevronRight, X, Check, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/app/components/ui/Button'
 import { Badge } from '@/app/components/ui/Badge'
 
@@ -24,6 +25,7 @@ interface DoctorsListProps {
   onEdit?: (medico: Medico) => void
   onDelete?: (medico: Medico) => void
   onToggleStatus?: (id: string, ativo: boolean) => void
+  onActivate?: (medicoId: string) => void
 }
 
 const especialidades = [
@@ -37,7 +39,7 @@ const especialidades = [
   'Uveíte',
 ]
 
-export default function DoctorsList({ medicos, onEdit, onDelete, onToggleStatus }: DoctorsListProps) {
+export default function DoctorsList({ medicos, onEdit, onDelete, onToggleStatus, onActivate }: DoctorsListProps) {
   const [search, setSearch] = useState('')
   const [especialidadeFilter, setEspecialidadeFilter] = useState('')
   const [turnoFilter, setTurnoFilter] = useState('')
@@ -210,17 +212,23 @@ export default function DoctorsList({ medicos, onEdit, onDelete, onToggleStatus 
 
                     {/* Status */}
                     <td className="px-5 py-3.5">
-                      <button
-                        onClick={() => onToggleStatus?.(medico.id, medico.ativo)}
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200 hover:scale-105 ${
-                          medico.ativo
-                            ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                            : 'bg-red-50 text-red-700 hover:bg-red-100'
-                        }`}
-                      >
-                        <span className={`h-1.5 w-1.5 rounded-full ${medico.ativo ? 'bg-emerald-500 animate-pulse' : 'bg-red-400'}`} />
-                        {medico.ativo ? 'Ativo' : 'Inativo'}
-                      </button>
+                      {medico.ativo ? (
+                        <button
+                          onClick={() => onToggleStatus?.(medico.id, medico.ativo)}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 transition-all duration-200 hover:scale-105 hover:bg-emerald-100"
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Ativo
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => onActivate?.(medico.id)}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 transition-all duration-200 hover:scale-105 hover:bg-emerald-100"
+                        >
+                          <CheckCircle2 size={12} />
+                          Ativar Médico
+                        </button>
+                      )}
                     </td>
 
                     {/* Ações */}
