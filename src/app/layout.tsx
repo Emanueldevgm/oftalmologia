@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import RootLayoutClient from './RootLayoutClient'
 import { SEO_CONFIG } from '@/config/site'
+import { AgentChat } from './components/AgentChat/AgentChat'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -31,7 +32,10 @@ export default function RootLayout({
   return (
     <html lang="pt-AO" className={inter.variable} suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans text-on-surface antialiased">
-        <RootLayoutClient>{children}</RootLayoutClient>
+        <RootLayoutClient>
+             {children}
+             <AgentChat />
+        </RootLayoutClient>
       </body>
     </html>
   )
